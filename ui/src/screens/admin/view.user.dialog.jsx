@@ -24,26 +24,37 @@ const ViewUserDialog=({setShowViewUserDialog, user})=>{
                         <div className="col-6 sm:col-6 surface-100">
                             {user?.lastName}
                         </div>
-
                         <div className={'col-6 sm:col-6'}>
-                            User Level
+                            User Address
                         </div>
                         <div className="col-6 sm:col-6">
-                            {user?.userLevel}
+                            {user?.address}
+                        </div>
+                        <div className={'col-6 sm:col-6 surface-100'}>
+                            User Email
+                        </div>
+                        <div className="col-6 sm:col-6 surface-100">
+                            {user?.email}
+                        </div>
+                        <div className={'col-6 sm:col-6'}>
+                            User Phone
+                        </div>
+                        <div className="col-6 sm:col-6">
+                            {user?.phone}
                         </div>
 
                         <div className={'col-6 sm:col-6 surface-100'}>
-                            Active
+                            User Level
                         </div>
                         <div className="col-6 sm:col-6 surface-100">
-                            {user?.active?.toString()}
+                            {user?.userLevel}
                         </div>
 
-                        <div className={'col-6 sm:col-6'}>
-                            User Roles
+                        <div className={'col-6 sm:col-6 '}>
+                            Active
                         </div>
                         <div className="col-6 sm:col-6">
-                            {user?.roles?.map(r=>r?.name+', ')}
+                            {user?.active?.toString()}
                         </div>
 
 

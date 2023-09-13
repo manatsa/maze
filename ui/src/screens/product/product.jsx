@@ -117,7 +117,7 @@ const Product =  () => {
         {label:'Other Info'}
     ]
 
-    let {data, error, isError, isLoading }=doFetch('/api/products/',token,['get',productRefreshParam,'products']);
+    let {data, isLoading }=doFetch('/api/products/',token,['get',productRefreshParam,'products']);
     let industryMutation =doFetch('/api/industry/',token,['get','industry']);
     let categoryMutation =doFetch('/api/category/',token,['get','category']);
     let subscriptionMutation =doFetch(`/api/subscriptions/active/${logins?.id?logins?.id:'x'}`,token,['get',logins?.id,'subscription']);
@@ -155,7 +155,8 @@ const Product =  () => {
         })
 
         let paidUps=prods?.filter(p=>{
-            if(logins && logins?.username && token)
+
+            if(logins && logins?.userName && token)
             {
                 return p;
             }else{
@@ -179,13 +180,16 @@ const Product =  () => {
 
     const onCustomerSubmit= (values)=>{
         let payment=values?.payment;
-        let logged=(token!==null && logins!=null && logins?.userName!==null);
-        console.log(logged)
+        let logged=(token!==null && token!=='null' && logins!=null && logins?.userName);
+        let customer={...values};
+        if(logged)
+        {
+            customer={...customer,...logins}
+        }
 
-        let info={customer:values, logged,payment, orders:cartItems?.map(cartItem=>{
+        let info={customer, logged,payment, orders:cartItems?.map(cartItem=>{
             return {productID: cartItem?.product?.id, quantity:cartItem?.quantity}
             })};
-        console.log(info)
         setIsSaving(true)
         customerMutation.mutate({id:values?.id, info:info});
     }
@@ -236,8 +240,9 @@ const Product =  () => {
 
     const productListItems = (product) => {
 
+
         const op = createRef();
-        const isProductAdmin= ((logins!==null) && ((product?.owner?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
+        const isProductAdmin= ((logins!==null) && ((product?.ownerFull?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
 
         const productHeader=(
             <div className={'flex flex-row surface-200 border-round border-0 p-2'} onClick={e=>{
@@ -288,11 +293,7 @@ const Product =  () => {
                                 }
                                 }> &nbsp;{` ${product?.ownerName}`}</a></span>
                                 <div className="flex flex-1 flex-row p-5 gap-5">
-                                    {isProductAdmin && <Button icon="pi pi-plus p-4" className="p-button-rounded"  severity={'secondary'}
-                                                               onClick={event => {
-                                                                   setSelectedProduct(product);
-                                                                   openNew();
-                                                               }} /> }
+
                                     <Button tooltip={'View product details'} icon="pi pi-eye p-4" className="p-button-rounded" style={{backgroundColor: PrimaryColor}}
                                             onClick={event => {
                                                 setSelectedProduct(product);
@@ -303,10 +304,12 @@ const Product =  () => {
                                                                    setSelectedProduct(product);
                                                                    editProduct();
                                                                }} /> }
-                                    <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-app-tooltip p-button-rounded p-button-outlined cart" severity={'success'} onClick={()=>{
+                                    {!isProductAdmin &&
+                                        <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-app-tooltip p-button-rounded p-button-outlined cart" severity={'success'} onClick={()=>{
                                         setSelectedProduct(product);
                                         setShowQuantity(true);
                                     }}></Button>
+                                    }
                                 </div>
                             </div>
                         </div>
@@ -323,7 +326,7 @@ const Product =  () => {
     const productGridItems = (product) => {
         const op = createRef();
 
-        const isProductAdmin= ((logins!==null) && ((product?.owner?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
+        const isProductAdmin= ((logins!==null) && ((product?.ownerFull?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
 
         const items =
             [
@@ -456,7 +459,9 @@ const Product =  () => {
     const itemSearch=(value)=>{
         setSearchValue(value)
         let ps=[...products];
-        let filteredProducts=ps.filter(p=>p?.name?.toLowerCase()?.includes(event.target.value?.toLowerCase())|| p?.description?.includes(event.target.value))
+        let filteredProducts=ps.filter(p=>p?.name?.toLowerCase()?.includes(event.target.value?.toLowerCase())|| p?.description?.toLowerCase()?.includes(event.target.value?.toLowerCase())
+        || p?.ownerFull?.firstName?.toLowerCase()?.includes(event.target.value?.toLowerCase()) || p?.ownerFull?.lastName?.toLowerCase()?.includes(event.target.value?.toLowerCase())
+            || p?.category?.toLowerCase().includes(event.target.value?.toLowerCase()) || p?.industry?.toLowerCase()?.includes(event.target.value?.toLowerCase()))
         setFilteredProducts(filteredProducts);
     }
 
@@ -663,10 +668,13 @@ const Product =  () => {
                             <div className="col-6 sm:col-6">{selectedProduct?.active?.toString()}</div>
 
                             <div className="col-6 sm:col-6">Owner</div>
-                            <div className="col-6 sm:col-6">{selectedProduct?.owner}</div>
+                            <div className="col-6 sm:col-6"><a onClick={()=>{
+                                setOwner(selectedProduct?.ownerFull)
+                                setShowProductOwner(true)
+                            }} href={'#'}>{selectedProduct?.ownerFull?.firstName+' '+selectedProduct?.ownerFull?.lastName} </a></div>
 
                             <div className="col-6 sm:col-6">Price</div>
-                            <div className="col-6 sm:col-6">{selectedProduct?.price}</div>
+                            <div className="col-6 sm:col-6">${selectedProduct?.price?.toFixed(2)}</div>
 
                             <div className="col-6 sm:col-6">Tags</div>
                             <div className="col-6 sm:col-6">{selectedProduct?.tags}</div>
@@ -674,11 +682,9 @@ const Product =  () => {
                             <div className="col-6 sm:col-6">Effect Date</div>
                             <div className="col-6 sm:col-6">{selectedProduct?.effectiveDate?.toLocaleString()?.split('T')[0]}</div>
 
-                            <div className="col-6 sm:col-6">Promotions</div>
-                            <div className="col-6 sm:col-6"><Button label={'Promotions'} onClick={()=>alert('Promotion')} /></div>
 
                             <div className="col-6 sm:col-6">Date Created</div>
-                            <div className="col-6 sm:col-6">{selectedProduct?.dateCreated}</div>
+                            <div className="col-6 sm:col-6">{selectedProduct?.dateCreated?.toLocaleString()}</div>
 
                             <div className="col-6 sm:col-6">Created By</div>
                             <div className="col-6 sm:col-6">{selectedProduct?.createdBy?.userName?.toString()}</div>
@@ -803,7 +809,8 @@ const Product =  () => {
                     </div>
                     <Button label={'Checkout'} icon={'pi pi-check-circle'} disabled={cartItems?.length<=0} iconPos={'left'} severity={'success'}
                             tooltip={'Check Out'} onClick={()=>{
-                                if(!token) {
+                        let logged=(token!==null && token!=='null' && logins!=null && logins?.userName);
+                                if(!logged) {
                                     setGetUserInfo(true)
                                 }else{
                                     onCustomerSubmit(null);

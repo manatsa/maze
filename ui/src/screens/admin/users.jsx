@@ -58,6 +58,12 @@ const Users =  () => {
         },
         onMutate: ()=>setIndicator(true),
         onSuccess:(data)=>{
+            let us=data?.map(u=>{
+                return {...u, activeString: u?.active.toString(),
+                roleString: u?.roles?.map(r=>r?.printName+', ')
+                }
+            })
+            setUsers(us);
             showToast(toast, 'success', 'Operation Success!','Operation was successful.');
             setIndicator(false)
         }
@@ -91,7 +97,6 @@ const Users =  () => {
 
     const userData=doFetch('/api/users/',token,['get','users']);
     useEffect(()=>{
-        console.log(userData.data)
         setUsers(userData?.data);
     },[])
 
@@ -195,7 +200,6 @@ const Users =  () => {
     };
 
     const refresh=(data)=>{
-        console.log('RETURNED::',data)
         setUsers(data);
     }
 

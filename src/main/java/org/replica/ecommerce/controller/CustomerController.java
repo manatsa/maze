@@ -56,10 +56,8 @@ public class CustomerController {
         User user= userService.getCurrentUser();
         Customer customer=null;
         boolean logged=customerOrderDTO.getLogged();
-        System.err.println("LOGGED::"+logged);
         CustomerDTO customerDTO=customerOrderDTO.getCustomer();
         OrderDTO[] orderDTOs=customerOrderDTO.getOrders();
-        if(!logged || user!=null) {
             customer = customerService.getCustomerByEmailOrPhone(customerDTO.getEmail(), customerDTO.getPhone());
             if(customer==null){
                 customer= new Customer();
@@ -72,22 +70,11 @@ public class CustomerController {
                 customer.setPhone2(customer.getPhone2());
                 customer.setTitle(customerDTO.getTitle());
                 customer.setActive(Boolean.TRUE);
-                customer.setDeliver(customerDTO.getDeliver().equalsIgnoreCase("Yes"));
-                customer.setRegister(customerDTO.getRegister().equalsIgnoreCase("Yes"));
+                customer.setDeliver(customerDTO.getDeliver()!=null?customerDTO.getDeliver().equalsIgnoreCase("Yes"):false);
+                customer.setRegister(customerDTO.getRegister()!=null?customerDTO.getRegister().equalsIgnoreCase("Yes"):false);
                 customer =customerService.save(customer, user);
             }
-        }else{
-            customer=new Customer("Other",
-                    user.getFirstName(),
-                    user.getLastName(),
-                    user.getAddress(),
-                    "",
-                    user.getEmail(),
-                    user.getPhone(),
-                    "",
-                    customerDTO.getDeliver().equalsIgnoreCase("Yes"),
-                    customerDTO.getRegister().equalsIgnoreCase("Yes"));
-                }
+
 
         try{
 

@@ -110,6 +110,8 @@ public class UserServiceImpl implements UserService {
     public User resetPassword(String id, User editor) {
         User t=get(id);
         String hashedPassword = passwordEncoder.encode(def);
+        System.err.println("HASHED::"+hashedPassword);
+        System.err.println("MATCHES::"+passwordEncoder.matches(t.getPassword(),hashedPassword));
         t.setPassword(hashedPassword);
         t.setModifiedBy(editor.getUserName());
         t.setDateModified(new Date());

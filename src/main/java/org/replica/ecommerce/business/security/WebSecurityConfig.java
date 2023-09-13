@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -49,15 +50,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtRequestFilter jwtRequestFilter;
 
     @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         // configure AuthenticationManager so that it knows from where to load user for matching credentials, use BCryptPasswordEncoder
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+        auth
+                .userDetailsService(jwtUserDetailsService)
+                .passwordEncoder(passwordEncoder);
     }
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(8);
-    }
+
+
 
     @Bean
     @Override
@@ -67,12 +71,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-        // We don't need CSRF for this example
         httpSecurity
                 .csrf().disable().httpBasic().and()
                 .authorizeRequests().antMatchers(
                         "/api/authenticate","/api/category/","/api/category/industry/**","/api/industry/","/api/products/","/api/subscriptions/active/**",
-                        "/api/products/category/**","/","/home","/assets/**","**.js","**/images/**","**.html","/logo.ico","/api/professionals/", "/api/customers/**"
+                        "/api/products/category/**","/","/home","/assets/**","**.js","**/images/**","**.html","/logo.ico","/api/professionals/", "/api/customers/**","/error"
                 ).permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()

@@ -64,7 +64,6 @@ const Orders =  () => {
 
     const {data, error, isError, isLoading }=doFetch('/api/customers/orders/',token,['get','all','orders']);
 
-    console.log(data)
     useEffect(()=>{
         let order=data?.map(order=>{
             return {...order, firstName: order?.customer?.firstName, lastName: order?.customer?.lastName, customerAddress: order?.customer?.address,
@@ -79,7 +78,6 @@ const Orders =  () => {
         { field: 'lastName', header: 'LAST NAME' },
         { field: 'customerAddress', header: 'CUSTOMER ADDRESS' },
         { field: 'customerPhone', header: 'CUSTOMER PHONE' },
-        { field: 'customerPhone2', header: 'CUSTOMER PHONE 2' },
         { field: 'customerEmail', header: 'CUSTOMER EMAIL' },
         { field: 'productName', header: 'PRODUCT NAME' },
         { field: 'productDescription', header: 'PRODUCT DECSRIPTION' },
@@ -160,26 +158,6 @@ const Orders =  () => {
             </div>)
     };
 
-    /*const refresh=(data)=>{
-        const orders = data?.map(r=>{
-            let pr=r?.privileges?.map(p=>p.name);
-            let prString='';
-            pr.forEach(p=>{
-                prString+=p+','
-            })
-            return {...r,privileges:pr,privilegeString:prString?.substring(0, prString.length-1) }
-        })
-        setOrders(orders);
-    }*/
-
-    const showSuccessFeedback=()=>{
-        showToast(toast,'success','Operation Feedback','Operation completed successfully!')
-    }
-
-    const showErrorFeedback=(error)=>{
-        showToast(toast,'error','Operation Feedback',error.toString())
-    }
-
 
     return (
         <>
@@ -211,13 +189,34 @@ const Orders =  () => {
                     </div>
                 }} visible={openViewRoleDialog} style={{ width: '60vw' }} onHide={() => setOpenViewRoleDialog(false)}>
                    <div className={'grid'}>
-                       <div className="col-6 sm:col-6">Role Name</div>
-                       <div className="col-6 sm:col-6">{selectedOrder?.name}</div>
+                       <div className="col-6 sm:col-6">Customer First Name</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.customer?.firstName}</div>
 
-                       <div className="col-6 sm:col-6">Role privileges</div>
-                       <div className="col-6 sm:col-6">{selectedOrder?.privileges?.map(p=>p?.name+', ')}</div>
+                       <div className="col-6 sm:col-6">Customer Last Name</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.customer?.lastName}</div>
 
-                       <div className="col-6 sm:col-6">Role Active</div>
+                       <div className="col-6 sm:col-6">Customer Address</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.customer?.address}</div>
+
+                       <div className="col-6 sm:col-6">Customer Email Address</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.customer?.email}</div>
+
+                       <div className="col-6 sm:col-6">Customer Phone Number</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.customer?.phone}</div>
+
+                       <div className="col-6 sm:col-6">Product Name</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.product?.name}</div>
+
+                       <div className="col-6 sm:col-6">Product Description</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.product?.description}</div>
+
+                       <div className="col-6 sm:col-6">Product Tags</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.product?.tags}</div>
+
+                       <div className="col-6 sm:col-6">Order Quantity</div>
+                       <div className="col-6 sm:col-6">{selectedOrder?.quantity}</div>
+
+                       <div className="col-6 sm:col-6">Order Active</div>
                        <div className="col-6 sm:col-6">{selectedOrder?.active?.toString()}</div>
 
                        <div className="col-6 sm:col-6">Date Created</div>

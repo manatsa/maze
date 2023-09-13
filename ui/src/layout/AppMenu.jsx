@@ -94,7 +94,7 @@ export default function AppMenu() {
                 }
             },
         {
-                label: 'Orders To Me',
+                label: 'My Orders',
                 icon: 'pi pi-shopping-cart',
                 command: () => {
                     if(token && !isExpired){
@@ -103,18 +103,7 @@ export default function AppMenu() {
                         showToast(toast, 'error', 'Error 401: Access Denied','You need to log in to see profile details!')
                     }
                 }
-            },
-        {
-                label: 'Orders By Me',
-                icon: 'pi pi-shopping-cart',
-                command: () => {
-                    if(token && !isExpired){
-                        showToast(toast, 'success', 'My Orders','You have many orders!')
-                    }else{
-                        showToast(toast, 'error', 'Error 401: Access Denied','You need to log in to see profile details!')
-                    }
-                }
-            },
+        },
         {
             separator: true
         },
@@ -125,7 +114,7 @@ export default function AppMenu() {
                 localStorage.setItem('token', null);
                 localStorage.setItem('login', null);
                 setOpen(false);
-                navigate("/")
+                navigate("/?search=true")
             }
         }
     ];

@@ -105,7 +105,6 @@ public class UserController {
     @Auditor
     @PutMapping("/changePassword/{newPassword}")
     public ResponseEntity<?> changeUserPassword(@PathVariable("newPassword") String password){
-        System.err.println("NEW PASS::"+password);
         User currentUser=userService.getCurrentUser();
         userService.changePassword(currentUser, password);
         List<User> users=userService.getAll();
@@ -158,13 +157,15 @@ public class UserController {
             users.stream().map(user ->
             {
                 String privString=user.getRoles().stream().filter(role -> role!=null && role.getName()!=null).map(role -> privsToString(role)).collect(Collectors.joining(","));
+                String rolesString=rolesToString(user);
+                String actString=user.getActive().toString();
 
-                user.setRoleString(rolesToString(user));
+                System.err.println("ROLES:"+rolesString+" \t PRIVS::"+privString+" \t ACTIVE::"+actString);
+                user.setRoleString(rolesString);
                 user.setPrivilegeString(privString);
-                user.setActiveString(user.getActive().toString());
+                user.setActiveString(actString);
                 return user;
             });
-
 
             return ResponseEntity.ok(users);
         }catch(Exception e){
