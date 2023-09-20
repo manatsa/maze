@@ -429,10 +429,10 @@ const Product =  () => {
                                 }
                             </div>
 
-                            <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-app-tooltip p-button-rounded p-button-outlined cart" severity={'success'} onClick={()=>{
+                            {!isProductAdmin && <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-app-tooltip p-button-rounded p-button-outlined cart" severity={'success'} onClick={()=>{
                                 setSelectedProduct(product);
                                 setShowQuantity(true);
-                            }}></Button>
+                            }}></Button>}
                     </div>
 
                 </Fieldset>
@@ -600,7 +600,6 @@ const Product =  () => {
 
                 </div>
             </div>
-
 
 
             <div className={'flex justify-content-end'} style={{zIndex:10000, position:"fixed", bottom:100, right: 50}} onClick={()=>{

@@ -15,6 +15,8 @@ import AppAutocomplete from "../../components/AppAutocomplete.jsx";
 import {getLogin} from "../../auth/check.login.jsx";
 import showToast from "../../notifications/showToast.js";
 import {useJwt} from "react-jwt";
+import {USERLEVELS} from "../../components/Constants.jsx";
+import {Password} from "primereact/password";
 
 const EditUserDialog=({openNewUserDialog,setEditUserDialogVisible, selectedUser, token, setUsers, showErrorFeedback, showSuccessFeedback})=>{
 
@@ -53,14 +55,6 @@ const EditUserDialog=({openNewUserDialog,setEditUserDialogVisible, selectedUser,
 
     const rolesData=doFetch('api/roles/',token,['get',selectedUser?.id,'roles']);
 
-    const userLevels=[
-        {name:'USER', code:'USER'},
-        {name:'ADMIN', code:'ADMIN'},
-        {name:'MANAGER', code:'MANAGER'},
-        {name:'EXECUTIVE',code:'EXECUTIVE'}
-    ]
-
-
 
     const initialValues={
         id:selectedUser?.id ||'',
@@ -70,26 +64,32 @@ const EditUserDialog=({openNewUserDialog,setEditUserDialogVisible, selectedUser,
         active: selectedUser?.active || false,
         userLevel: {name:selectedUser?.userLevel, code:selectedUser?.userLevel} || {},
         roles: selectedUser?.roles?.map(role=>role?.name) || null,
+        password: ''
     }
 
     const validationSchema=yup.object().shape({
+        id: yup.string().optional(),
         firstName: yup.string().required("Please enter user's first name."),
         lastName: yup.string().required("Please enter user's last name."),
         userName: yup.string().required("Please enter user's username.").min(4,'Minimum length for a username is 4 characters. '),
         active: yup.boolean(),
         userLevel: yup.object().required("Please select user's level."),
-        roles: yup.array().min(1,'You must select at least one role for the user!').nonNullable()
+        roles: yup.array().min(1,'You must select at least one role for the user!').nonNullable(),
+        password: yup.string().optional()
     })
     const onSubmit= (values)=>{
+        if(values?.id!==null){
+            delete values?.password;
+        }
         const roles=values['roles']?.map(r=>typeof r==='string'?r:r?.name)
         const userLevel=values['userLevel']?.name;
         const user={...values, roles,userLevel};
-        console.log('USER::',user)
         mutate({id:values['id'],user})
         formik.resetForm();
         setEditUserDialogVisible(false)
 
     }
+
 
     const formik=useFormik({
         initialValues,validationSchema,onSubmit
@@ -137,17 +137,10 @@ const EditUserDialog=({openNewUserDialog,setEditUserDialogVisible, selectedUser,
                     </div>
                     <div className={'col-12 md:col-6'}>
                         <span className="p-float-label">
-                            <AppAutocomplete name={'userLevel'} items={userLevels} formik={formik} multiple={false} placeholder={'Select User Level'} dropdown={true} />
+                            <AppAutocomplete name={'userLevel'} items={USERLEVELS} formik={formik} multiple={false} placeholder={'Select User Level'} dropdown={true} />
                             <label htmlFor="userLevel">User Level</label>
                         </span>
                         {getFormErrorMessage('userLevel')}
-                    </div>
-                    <div className={'col-12 md:col-6'}>
-                        <div className="flex align-items-center">
-                            <Checkbox inputId="" name="activate" value={formik.values['active']} onChange={e => formik.setFieldValue('active', !e.value) } checked={formik.values['active']} />
-                            <label htmlFor="activate" className="ml-2">Activate</label>
-                        </div>
-                        {getFormErrorMessage('active')}
                     </div>
                     <div className={'col-12 md:col-6'}>
                         <span className="p-float-label">
@@ -155,6 +148,22 @@ const EditUserDialog=({openNewUserDialog,setEditUserDialogVisible, selectedUser,
                             <label htmlFor="roles">User Roles</label>
                         </span>
                         {getFormErrorMessage('roles')}
+                    </div>
+                    {!formik?.values['id'] && <div className={'col-12 md:col-6'}>
+                        <span className="p-float-label">
+                            <Password id="password" name="password" value={formik.values['password']} onChange={(e) => formik.setFieldValue('password', e.target.value)}
+                                       className={classNames({ 'p-invalid': isFormFieldInvalid('password') })} style={{width:'100%'}} toggleMask={true} inputStyle={{width:'100%'}}
+                            />
+                            <label htmlFor="password">Initial Password</label>
+                        </span>
+                        {getFormErrorMessage('password')}
+                    </div>}
+                    <div className={'col-12 md:col-6'}>
+                        <div className="flex align-items-center">
+                            <Checkbox inputId="" name="activate" value={formik.values['active']} onChange={e => formik.setFieldValue('active', !e.value) } checked={formik.values['active']} />
+                            <label htmlFor="activate" className="ml-2">Activate</label>
+                        </div>
+                        {getFormErrorMessage('active')}
                     </div>
                 </div>
 

@@ -32,6 +32,12 @@ const AppAutocomplete=({formik,items,name,multiple, placeholder, dropdown})=>{
                 completeMethod={search}
                 placeholder={placeholder}
                 className="w-full"
+                style={{width:'100%'}}
+                inputStyle={{width:'100%'}}
+                inputMode={'text'}
+                inputClassName={'w-full'}
+                panelClassName={'w-full'}
+                panelStyle={{width:'100%'}}
                 onChange={(e) => {
                     formik.setFieldValue(name,e.value)
                 }}

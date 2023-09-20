@@ -21,6 +21,15 @@ import {otherColor, PrimaryColor, SecondaryColor} from "../../components/Constan
 import './professional.css';
 import {Message} from "primereact/message";
 import {Tooltip} from "primereact/tooltip";
+import MultiStepForm from "../../components/MultiStepForm.jsx";
+import * as yup from "yup";
+import CustomerStep1 from "../customer/customerStep1.jsx";
+import CustomerStep2 from "../customer/customerStep2.jsx";
+import CustomerStep3 from "../customer/customerStep3.jsx";
+import {useMutation} from "@tanstack/react-query";
+import doUpdate from "../../query/doUpdate.js";
+import CustomerProfessionalStep3 from "../customer/customerProfessionalStep3.jsx";
+import CustomerProfessionalStep4 from "../customer/customerProfessionalStep4.jsx";
 
 
 const Product =  () => {
@@ -36,11 +45,11 @@ const Product =  () => {
     const [rows, setRows] = useState(6);
     const [searchValue, setSearchValue] = useState('');
     const [showMessage, setShowMessage] = useState(true);
-
+    const [getUserInfo, setGetUserInfo] = useState(false);
     const professionalDataOverlayRef=createRef();
-
+    const [isSaving, setIsSaving] = useState(false);
     const [selectedCategories, setCategories] = useState([])
-
+    const [mergedValues, setMergedValues] = useState({});
     const professionalLocation = useLocation();
     const paramArr = professionalLocation['search']?.split('?');
     let professionalRefreshParam=null;
@@ -57,7 +66,92 @@ const Product =  () => {
 
     let subscriptionMutation =doFetch(`/api/subscriptions/active/${logins?.id?logins?.id:'x'}`,token,['get',logins?.id,'subscription']);
     let subsMutation =doFetch(`/api/subscriptions/active/all`,token,['get','active','subscription']);
+    const customerMutation=useMutation({
+        mutationFn: data=>doUpdate('api/customers/',token, data?.id, data?.info),
+        onError: error => showErrorFeedback(error),
+        onSuccess: (data, variables, context) => {
 
+            showSuccessFeedback();
+            setIsSaving(false)
+            setGetUserInfo(false);
+        }
+    })
+
+    const customerInitialValues=[
+        {
+            title: '',
+            firstName: '',
+            lastName: '',
+        },
+        {
+            address: '',
+            address2: '',
+            email: '',
+            phone: '',
+            phone2: '',
+        },
+        {
+            deliver:'Yes',
+            register: 'Yes',
+            payment: false,
+        },
+        {
+            recurring: false,
+            recurringPeriod: '',
+            bookingDate: null
+        }
+    ]
+
+    const customerValidationSchema=[
+        yup.object().shape({
+            title: yup.string().required("Please select your title."),
+            firstName: yup.string().required("Please enter your first name."),
+            lastName: yup.string().required("Please enter your last name."),
+        }),
+        yup.object().shape({
+            address: yup.string().required("Please enter your residential address"),
+            address2: yup.string(),
+            email: yup.string().email().optional(),
+            phone: yup.string().required("Please enter your mobile number."),
+        }),
+        yup.object().shape({
+            deliver: yup.string().optional(),
+            register: yup.string().optional(),
+            payment: yup.boolean().optional()
+        }),
+        yup.object().shape({
+            homeService: yup?.string().optional(),
+            recurring: yup.string().optional(),
+            recurringPeriod: yup.string().optional(),
+            bookingDate: yup.date().optional().typeError('Please input a valid date'),
+        })
+    ]
+
+    const customerStepLabels=[
+        {label:'General Info'},
+        {label:'Contact Info'},
+        {label:'Other Info'},
+        {label: 'Booking Info'}
+    ]
+
+    const customerSteps=[ CustomerStep1, CustomerStep2, CustomerProfessionalStep3, CustomerProfessionalStep4 ]
+
+    const onCustomerSubmit= (values)=>{
+        console.log(values)
+        let payment=values?.payment;
+        let logged=(token!==null && token!=='null' && logins!=null && logins?.userName);
+        let customer={...values};
+        if(logged)
+        {
+            customer={...customer,...logins}
+        }
+
+        let info={customer, logged,payment,
+            professionalOrderDTO:{professionalID: selectedProfessional?.id, homeService:values['homeService'], recurring: values?.recurring,
+                recurringPeriod: values?.recurringPeriod, bookingDate: values?.bookingDate, payment: values?.payment}};
+        setIsSaving(true)
+        customerMutation.mutate({id:values?.id, info:info});
+    }
 
     useEffect(()=>{
         if(token && logins && logins?.userName?.length>0  && subscriptionMutation?.data?.length>0){
@@ -140,8 +234,7 @@ const Product =  () => {
     const professionalListItems = (professional) => {
 
         const op = createRef();
-        const isProductAdmin= ((logins!==null) && ((professional?.owner?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
-
+        const isProductAdmin= ((logins!==null) && ((professional?.administrator?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
 
         const professionalHeader=(
             <div className={'flex flex-row surface-200 border-round border-0 p-2'}
@@ -196,7 +289,10 @@ const Product =  () => {
                                                                    setSelectedProfessional(professional);
                                                                    editProfessional();
                                                                }} style={{backgroundColor: SecondaryColor}} /> }
-                                    <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-button-rounded" severity={'success'}></Button>
+                                    {!isProductAdmin && <Button tooltip={'Add to shopping basket'} onClick={()=>{
+                                        setSelectedProfessional(professional)
+                                        setGetUserInfo(true)
+                                    }} icon="pi pi-shopping-cart" className="p-button-rounded p-button-outlined cart" severity={'success'}></Button> }
                                 </div>
                             </div>
                         </div>
@@ -213,7 +309,7 @@ const Product =  () => {
     const professionalGridItems = (professional) => {
         const op = createRef();
 
-        const isProductAdmin=(logins?.roles?.includes('ADMIN'));
+        const isProductAdmin= ((logins!==null) && ((professional?.administrator?.userName?.toLowerCase()===logins?.userName?.toLowerCase()) || logins?.roles?.includes('ADMIN')));
 
         const items =
             [
@@ -257,7 +353,7 @@ const Product =  () => {
                 </div>
         )
         return (
-            <div className="col-12 sm:col-6 lg:col-12 xl:col-4 my-3" key={professional?.id} >
+            <div className="col-12 sm:col-6 lg:col-12 xl:col-4 my-1" key={professional?.id} >
                 <Fieldset className="p-1 border-2 surface-border surface-card border-round" legend={professionalHeader}>
                     <p className="text-sm font-italic text-blue-500">{professional.address}</p>
                     {professional?.address2 && <p className="text-sm font-italic text-blue-600">{professional.address}</p>}
@@ -312,7 +408,10 @@ const Product =  () => {
                                 }
                             </div>
 
-                            <Button tooltip={'Add to shopping basket'} icon="pi pi-shopping-cart" className="p-button-rounded p-button-outlined cart" severity={'success'}></Button>
+                            {!isProductAdmin && <Button tooltip={'Add to shopping basket'} onClick={()=>{
+                                setSelectedProfessional(professional)
+                                setGetUserInfo(true)
+                            }} icon="pi pi-shopping-cart" className="p-button-rounded p-button-outlined cart" severity={'success'}></Button> }
                     </div>
 
                 </Fieldset>
@@ -579,6 +678,26 @@ const Product =  () => {
                     </div>
 
                 </div>
+            </Dialog>
+
+            <Dialog header={()=>{
+                return <div style={{textDecoration:'underline', textDecorationColor:SecondaryColor, paddingLeft:20, paddingRight:10}}>
+                    <Typography component="h1" variant="h3" color={PrimaryColor}>
+                        {"Customer Details"}
+                    </Typography>
+                </div>
+            }} visible={getUserInfo} style={{ width: '60vw' }} sx={{width:'100%'}} onHide={() => setGetUserInfo(false)}>
+                <MultiStepForm
+                    steps={customerSteps}
+                    stepLabels={customerStepLabels}
+                    initialValues={customerInitialValues}
+                    validationSchema={customerValidationSchema}
+                    mergedValues={mergedValues}
+                    setMergedValues={setMergedValues}
+                    onSubmit={onCustomerSubmit}
+                    token={token}
+                    isLoading={isSaving}
+                />
             </Dialog>
 
         </>

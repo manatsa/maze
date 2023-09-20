@@ -239,7 +239,10 @@ const Users =  () => {
                             {selectedUser && selectedUser?.id ? selectedUser?.firstName+' '+selectedUser?.lastName:"New User"}
                         </Typography>
                     </div>
-                }} visible={openNewUserDialog} style={{ width: '80vw' }} onHide={() => setOpenNewUserDialog(false)}>
+                }} visible={openNewUserDialog} style={{ width: '80vw' }} onHide={() => {
+                    setSelectedUser(null)
+                    setOpenNewUserDialog(false)
+                }}>
                     <EditUserDialog selectedUser={selectedUser} setEditUserDialogVisible={setOpenNewUserDialog} openNewUserDialog={openNewUserDialog}
                                     token={token} setUsers={refresh} showSuccessFeedback={showSuccessFeedback} showErrorFeedback={showErrorFeedback}/>
                 </Dialog>

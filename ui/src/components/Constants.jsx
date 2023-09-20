@@ -1,7 +1,7 @@
 export const PrimaryColor='#240973';
 export const SecondaryColor='#cfa53b';
 export const otherColor='#30278c';
-export const AppName='UZSDAAA PLATFORM'
+export const AppName='E-MAZE MARKET'
 export const YES_NO=[
     {label:'YES', value:'Yes'},
     {label:'NO', value:'No'}
@@ -11,6 +11,21 @@ export const DISCOUNT_TYPES=[
     {label: 'Literal', value: 'val'},
     {label:'Coupon', value:'coupon'}
 ]
+
+export const USERLEVELS=[
+    {name:'USER', code:'USER'},
+    {name:'ADMIN', code:'ADMIN'},
+    {name:'MANAGER', code:'MANAGER'},
+    {name:'EXECUTIVE',code:'EXECUTIVE'}
+]
+export const RECUR_PERIOD=[
+    {label: 'DAILY', value:'DAILY'},
+    {label: 'WEEKLY', value: 'WEEKLY'},
+    {label:'MONTHLY', value:'MONTHLY'},
+    {label: 'QUARTERLY', value: 'QUARTERLY'},
+    {label:'YEARLY', value:'YEARLY'}
+]
+
 export const TITLEOPTIONS=[
     {label:'Prof', value: 'Prof'},
     {label:'Dr', value:'Dr.'},
