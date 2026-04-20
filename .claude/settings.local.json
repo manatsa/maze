@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(where:*)",
+      "Bash(mvn compile:*)",
+      "Bash(findstr:*)",
+      "Bash(java -version)",
+      "WebSearch",
+      "Bash(mvn spring-boot:run:*)",
+      "Bash(powershell -Command:*)",
+      "Bash(netstat:*)",
+      "Bash(taskkill //f //pid 26676)",
+      "Bash(taskkill //f //pid 17152)",
+      "Bash(taskkill //f //pid 6812)",
+      "Bash(mvn clean:*)",
+      "Bash(java -jar target/maze-1.0.1.jar)",
+      "Bash(taskkill /PID 4408 /F)",
+      "Bash(taskkill /F /PID 4408)",
+      "Bash(Stop-Process -Id 4408 -Force)",
+      "Bash(taskkill -F -PID 4408)",
+      "Bash(taskkill -F -PID 8160)",
+      "Bash(taskkill /F /PID 10672)",
+      "Bash(taskkill //F //PID 10672)",
+      "Bash(git add *)"
+    ]
+  }
+}

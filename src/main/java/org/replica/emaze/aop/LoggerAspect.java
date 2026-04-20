@@ -37,8 +37,13 @@ public class LoggerAspect {
         long end=System.currentTimeMillis();
         var actionName=joinPoint.getSignature().getName();
         var action=actionName.startsWith("get")?"GET":actionName.startsWith("create")?"POST":actionName.startsWith("update")?"PUT":"OTHER";
-        AuditTrail trail= new AuditTrail(userService.getCurrentUsername(),new Date(start), new Date(end),joinPoint.getSignature().toString(),actionName,action );
-        auditTrailService.save(trail, userService.getCurrentUser());
+        String username = userService.getCurrentUsername();
+        AuditTrail trail= new AuditTrail(username != null ? username : "anonymous",new Date(start), new Date(end),joinPoint.getSignature().toString(),actionName,action );
+        try {
+            auditTrailService.save(trail, userService.getCurrentUser());
+        } catch (Exception e) {
+            // silently skip audit if save fails for anonymous users
+        }
         return proceed;
     }
 }

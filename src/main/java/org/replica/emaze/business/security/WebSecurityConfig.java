@@ -76,9 +76,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable().httpBasic().and()
                 .authorizeRequests()
                 .expressionHandler(webSecurityExpressionHandler())
+                .antMatchers(HttpMethod.GET,
+                        "/api/products/","/api/products/category/**"
+                ).permitAll()
                 .antMatchers(
-                        "/api/authenticate","/api/category/","/api/category/industry/**","/api/industry/","/api/products/","/api/subscriptions/active/**",
-                        "/api/products/category/**","/","/home","/assets/**","**.js","**/images/**","**.html","/logo.ico","/api/professionals/", "/api/customers/**","/error"
+                        "/api/authenticate","/api/category/","/api/category/industry/**","/api/industry/","/api/subscriptions/active/**",
+                        "/","/home","/assets/**","**.js","**/images/**","**.html","/logo.ico","/api/professionals/", "/api/customers/**","/error"
                 ).permitAll()
                 // all other requests need to be authenticated
                 .anyRequest().authenticated().and()

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import java.util.Date;
 
@@ -21,7 +22,9 @@ import java.util.Date;
 public class AuditTrail extends BaseEntity{
 
     private String username;
+    @Column(name = "start_time")
     private Date start;
+    @Column(name = "end_time")
     private Date end;
     private String signature;
     private String actionName;

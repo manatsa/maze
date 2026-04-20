@@ -60,6 +60,7 @@ export default function Login({showLoginDialog}) {
             const token=data?.token;
             await localStorage.setItem('token',token);
             await localStorage.setItem('login',JSON.stringify(data));
+            showLoginDialog(false);
             navigate({
                 path:"/",
                 search: createSearchParams({
@@ -71,8 +72,6 @@ export default function Login({showLoginDialog}) {
             if(mutation.isError){
                 showToast(toast,'error','Login Error',mutation?.error?.message);
             }
-
-            showLoginDialog(false);
         },
     })
 
